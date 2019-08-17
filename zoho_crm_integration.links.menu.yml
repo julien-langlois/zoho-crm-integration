@@ -1,0 +1,5 @@
+zoho_crm_integration.settings:
+  title: 'Zoho CRM Integration'
+  parent: system.admin_config_services
+  description: 'Configure the Zoho CRM configurations.'
+  route_name: zoho_crm_integration.settings
