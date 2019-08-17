@@ -1,0 +1,5 @@
+name: Zoho CRM API
+description: Using the Zoho PHP SDK provides integration to Zoho CRM Rest API.
+type: module
+core: 8.x
+package: Third-party Integration
