@@ -1,0 +1,7 @@
+zoho_crm_integration.settings:
+  path: '/admin/config/services/zoho-crm-integration'
+  defaults:
+    _form: '\Drupal\zoho_crm_integration\Form\ZohoCRMIntegrationForm'
+    _title: 'Zoho CRM Integration Settings'
+  requirements:
+    _permission: 'administer site configuration'
