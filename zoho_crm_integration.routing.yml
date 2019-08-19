@@ -4,6 +4,6 @@ zoho_crm_integration.settings:
     _controller: '\Drupal\zoho_crm_integration\Controller\ZohoCRMIntegrationSettingsPage::content'
     _title: 'Zoho CRM Integration Settings'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'administer zoho settings'
   options:
     _admin_route: TRUE

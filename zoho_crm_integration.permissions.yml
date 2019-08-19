@@ -1,0 +1,3 @@
+administer zoho settings:
+  title: 'Administer Zoho Settings'
+  description: 'Allow administration of Zoho CRM integration settings.'
