@@ -1,0 +1,43 @@
+{#
+/**
+ * @file
+ * Module settings page theme implementation to display the form and instructions.
+ *
+ * Available variables:
+ * - form: The module settings form.
+ * - status: The status about the API connection. Return 0 or 1.
+ */
+#}
+{%
+  set classes = [
+  'zoho-settings-status',
+  status ? 'connected',
+]
+%}
+<section class="zoho-crm-settings">
+  <div class="zoho-setting-form">
+    {{ form }}
+  </div>
+  <div class="zoho-settings-instructions">
+    <div {{ attributes.addClass(classes) }}>
+      <span>STATUS:</span>
+      {% if status == 1 %}
+        Connected
+      {% else %}
+        Not connected
+      {% endif %}
+    </div>
+    <h2>{{ 'How get your Keys'|t }}</h2>
+    <p>{{ 'All the Zoho CRM APIs are authenticated with OAuth2 standards, so it is mandatory to register and authenticate your client app with Zoho.'|t }}</p>
+    <ol class="steps">
+      <li>{{ 'Go to the site: <a href="http://accounts.zoho.com/developerconsole">accounts.zoho.com/developerconsole</a>'|t }}</li>
+      <li>{{ 'Click <strong>Add Client ID</strong>.'|t }}</li>
+      <li>{{ 'Enter the <strong>Client Name</strong>, <strong>Client</strong> <strong>Domain</strong> and <strong>Authorized Redirect URL</strong>.'|t }}</li>
+      <li>{{ 'Select the <strong>Client Type</strong> as <strong>Web based</strong>.'|t }}</li>
+      <li>{{ 'Click <strong>Create</strong>.'|t }}</li>
+      <li>{{ 'Your Client app would have been created and displayed by now.'|t }}</li>
+      <li>{{ 'The newly registered app\'s Client ID and Client Secret can be found by clicking <strong>Options → Edit</strong>.'|t }}</li>
+    </ol>
+    <p>{{ 'For more details see:'|t }} <a href="https://www.zoho.com/crm/developer/docs/php-sdk/clientapp.html">https://www.zoho.com/crm/developer/docs/php-sdk/clientapp.html</a></p>
+  </div>
+</section>
