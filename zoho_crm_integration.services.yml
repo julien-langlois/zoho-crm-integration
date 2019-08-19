@@ -1,0 +1,7 @@
+services:
+  logger.channel.zoho_crm_integration:
+    parent: logger.channel_base
+    arguments: ['zoho_crm_integration']
+  zoho_crm_integration.zoho_crm_integration_client_service:
+    class: Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationClientService
+    arguments: ['@config.factory']

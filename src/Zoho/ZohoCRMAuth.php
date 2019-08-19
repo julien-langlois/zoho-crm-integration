@@ -8,6 +8,11 @@ namespace Drupal\zoho_crm_integration\Zoho;
 class ZohoCRMAuth {
 
   /**
+   * Client service.
+   */
+  const CLIENT_SERVICE = 'zoho_crm_integration.zoho_crm_integration_client_service';
+
+  /**
    * Zoho settings form configs.
    */
   private $config;
@@ -16,8 +21,7 @@ class ZohoCRMAuth {
    * ZohoCRMAuth constructor.
    */
   public function __construct() {
-    // ToDo: Use service or dependency injection.
-    $this->config = \Drupal::config('zoho_crm_integration.settings');
+    $this->zohoCRMIntegrationClientService = \Drupal::service(self::CLIENT_SERVICE);
   }
 
   /**
@@ -26,9 +30,8 @@ class ZohoCRMAuth {
   public static function authorizationUrl() {
     $scope = (new ZohoCRMAuth)->getScope();
     $client_id = (new ZohoCRMAuth)->getClientId();
-    // ToDo: Use the Client class method.
-    $redirect_uri = 'http://d8.l/admin/config/services/zoho-crm-integration';
-    $url = "https://accounts.zoho.com/oauth/v2/auth?scope={$scope}&client_id={$client_id}&response_type=code&access_type=offline&redirect_uri={$redirect_uri}";
+    $redirect_url = \Drupal::service(self::CLIENT_SERVICE)->getRedirectUrl();
+    $url = "https://accounts.zoho.com/oauth/v2/auth?scope={$scope}&client_id={$client_id}&response_type=code&access_type=offline&redirect_uri={$redirect_url}";
 
     return $url;
   }
@@ -65,7 +68,8 @@ class ZohoCRMAuth {
    *   Return TRUE if found a Client ID value.
    */
   public function hasClientId() {
-    return ($this->config->get('client_id') != NULL && $this->config->get('client_id') != "");
+    return ($this->zohoCRMIntegrationClientService->getConfig()->get('client_id') != NULL
+      && $this->zohoCRMIntegrationClientService->getConfig()->get('client_id') != "");
   }
 
   /**
@@ -75,7 +79,7 @@ class ZohoCRMAuth {
    *   The Client ID value.
    */
   public function getClientId() {
-    return $this->config->get('client_id');
+    return $this->zohoCRMIntegrationClientService->getConfig()->get('client_id');
   }
 
 }
