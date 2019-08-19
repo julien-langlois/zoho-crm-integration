@@ -69,4 +69,5 @@ class ZohoCRMIntegrationPermissionsTest extends BrowserTestBase {
     // Make sure 403 (Access Denied) response is returned.
     $this->assertSession()->statusCodeEquals(403);
   }
+
 }
