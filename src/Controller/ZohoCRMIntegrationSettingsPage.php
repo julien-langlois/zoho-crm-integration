@@ -3,7 +3,6 @@
 namespace Drupal\zoho_crm_integration\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\zoho_crm_integration\Zoho\ZohoCRMAuth;
 
 /**
  * Module settings page controller.
@@ -23,7 +22,10 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
 
     // Get client ID.
     if (isset($_GET['code'])) {
-      $auth_service->generateAccessToken($_GET['code']);
+      $tokens = $auth_service->generateAccessToken($_GET['code']);
+      if (is_object($tokens)) {
+        \Drupal::service('messenger')->addMessage(t('You get Authorization on your Zoho CRM.'), 'status');
+      }
     }
 
     $build = [

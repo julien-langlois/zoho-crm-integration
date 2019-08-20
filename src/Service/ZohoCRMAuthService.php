@@ -41,6 +41,13 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $clientId;
 
   /**
+   * The client secret property.
+   *
+   * @var string
+   */
+  protected $clientSecret;
+
+  /**
    * @var Secret ID.
    */
   protected $secretId;
@@ -61,13 +68,20 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system) {
     global $base_url;
 
-    $scopes = ['ZohoCRM.users.ALL', 'ZohoCRM.modules.ALL'];
+    $scopes = [
+      'ZohoCRM.users.ALL',
+      'ZohoCRM.modules.ALL',
+      'Aaaserver.profile.Read',
+      'ZohoCRM.settings.ALL',
+      'ZohoCRM.bulk.ALL',
+    ];
 
     $this->configFactory = $config_factory;
     $this->scope = implode(",", $scopes);
     $this->clientId = $config_factory->get(self::SETTINGS)->get('client_id');
+    $this->clientSecret = $config_factory->get(self::SETTINGS)->get('client_secret');
     $this->userEmail = $config_factory->get(self::SETTINGS)->get('current_user_email');
-    $this->redirectUrl = $base_url . Url::fromRoute(SELF::ROUTE)->toString();
+    $this->redirectUrl = $base_url . Url::fromRoute(self::ROUTE)->toString();
     $this->fileSystem = $file_system->realPath('private://');
   }
 
@@ -80,6 +94,10 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   public function getAuthorizationUrl() {
     // @TODO: refactor to use absolute URL/query parameters properly.
     return "https://accounts.zoho.com/oauth/v2/auth?scope={$this->scope}&client_id={$this->clientId}&response_type=code&access_type=offline&redirect_uri={$this->redirectUrl}";
+  }
+
+  public function __get($name) {
+    return $this->$name;
   }
 
   /**
@@ -100,11 +118,11 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    */
   public function getAuthorizationParams() {
     return [
-      'client_id' => self::get('clientId'),
-      'client_secret' => self::get('clientSecret'),
-      'redirect_uri' => self::get('redirectUri'),
-      'currentUserEmail' => self::get('userEmail'),
-      'token_persistence_path' => self::get('fileSystem'),
+      'client_id' => $this->clientId,
+      'client_secret' => $this->clientSecret,
+      'redirect_uri' => $this->redirectUrl,
+      'currentUserEmail' => $this->userEmail,
+      'token_persistence_path' => $this->fileSystem,
     ];
   }
 
@@ -119,8 +137,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
 
     ZCRMRestClient::initialize($config);
     $oauth_client = ZohoOAuth::getClientInstance();
-    $oauth_tokens = $oauth_client->generateAccessToken($grant_token);
-
-    // @TODO: return success message.
+    return $oauth_client->generateAccessToken($grant_token);
   }
+
 }
