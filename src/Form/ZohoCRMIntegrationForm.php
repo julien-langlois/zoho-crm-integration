@@ -53,12 +53,6 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
       '#default_value' => $config->get('client_secret'),
     ];
 
-    $form['redirect_uri'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Redirect URI'),
-      '#default_value' => $config->get('redirect_uri'),
-    ];
-
     $form['current_user_email'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Current User Email'),
@@ -76,7 +70,6 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('client_id', $form_state->getValue('client_id'))
       ->set('client_secret', $form_state->getValue('client_secret'))
-      ->set('redirect_uri', $form_state->getValue('redirect_uri'))
       ->set('current_user_email', $form_state->getValue('current_user_email'))
       ->save();
 
