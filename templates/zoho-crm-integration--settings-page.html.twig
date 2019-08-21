@@ -5,39 +5,25 @@
  *
  * Available variables:
  * - form: The module settings form.
- * - status: The status about the API connection. Return 0 or 1.
  * - auth_url: URL to get authorization.
  */
 #}
-{%
-  set classes = [
-  'zoho-settings-status',
-  status ? 'connected',
-]
-%}
+
 <section class="zoho-crm-settings">
   <div class="zoho-setting-form">
     {{ form }}
-  </div>
-  <div class="zoho-settings-instructions">
-    <div {{ attributes.addClass(classes) }}>
-      <span>STATUS:</span>
-      {% if status == 1 %}
-        Connected
-      {% else %}
-        Not connected
-      {% endif %}
-    </div>
+
     {% if status == 1 %}
       <div class="revoke-link">
-        <a href="http://zohocrm.com">{{ "Revoke authorization"|t }}</a>
+        <a class="button button--secondary" href="http://zohocrm.com">{{ "Revoke authorization"|t }}</a>
       </div>
     {% else %}
       <div class="auth-link">
-        <a href="{{ auth_url }}">{{ "Get authorization"|t }}</a>
+        <a class="button button--secondary" href="{{ auth_url }}">{{ "Get authorization"|t }}</a>
       </div>
     {% endif %}
-
+  </div>
+  <div class="zoho-settings-instructions">
     <h2>{{ 'How get your Keys'|t }}</h2>
     <p>{{ 'All the Zoho CRM APIs are authenticated with OAuth2 standards, so it is mandatory to register and authenticate your client app with Zoho.'|t }}</p>
     <ol class="steps">
