@@ -45,18 +45,21 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => $this->t('Client ID'),
       '#default_value' => $config->get('client_id'),
+      '#required' => TRUE,
     ];
 
     $form['client_secret'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Client Secret'),
       '#default_value' => $config->get('client_secret'),
+      '#required' => TRUE,
     ];
 
     $form['current_user_email'] = [
-      '#type' => 'textfield',
+      '#type' => 'email',
       '#title' => $this->t('Current User Email'),
       '#default_value' => $config->get('current_user_email'),
+      '#required' => TRUE,
     ];
 
     return parent::buildForm($form, $form_state);
