@@ -28,9 +28,16 @@
         Not connected
       {% endif %}
     </div>
-    <div class="auth-link">
-      <a href="{{ auth_url }}">{{ "Get authorization"|t }}</a>
-    </div>
+    {% if status == 1 %}
+      <div class="revoke-link">
+        <a href="http://zohocrm.com">{{ "Revoke authorization"|t }}</a>
+      </div>
+    {% else %}
+      <div class="auth-link">
+        <a href="{{ auth_url }}">{{ "Get authorization"|t }}</a>
+      </div>
+    {% endif %}
+
     <h2>{{ 'How get your Keys'|t }}</h2>
     <p>{{ 'All the Zoho CRM APIs are authenticated with OAuth2 standards, so it is mandatory to register and authenticate your client app with Zoho.'|t }}</p>
     <ol class="steps">
