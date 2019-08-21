@@ -5,8 +5,10 @@ namespace Drupal\zoho_crm_integration\Service;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Url;
 use Drupal\Core\File\FileSystem;
+use zcrmsdk\crm\crud\ZCRMRecord;
 use zcrmsdk\crm\setup\restclient\ZCRMRestClient;
 use zcrmsdk\oauth\ZohoOAuth;
+use zcrmsdk\crm\exception\ZCRMException;
 
 /**
  * Class ZohoCRMAuthService.
@@ -83,6 +85,9 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->userEmail = $config_factory->get(self::SETTINGS)->get('current_user_email');
     $this->redirectUrl = $base_url . Url::fromRoute(self::ROUTE)->toString();
     $this->fileSystem = $file_system->realPath('private://');
+
+    // Initialize the Client Service.
+    ZCRMRestClient::initialize($this->getAuthorizationParams());
   }
 
   /**
@@ -93,7 +98,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    */
   public function getAuthorizationUrl() {
     // @TODO: refactor to use absolute URL/query parameters properly.
-    return "https://accounts.zoho.com/oauth/v2/auth?scope={$this->scope}&client_id={$this->clientId}&response_type=code&access_type=offline&redirect_uri={$this->redirectUrl}";
+    return "https://accounts.zoho.com/oauth/v2/auth?prompt=consent&scope={$this->scope}&client_id={$this->clientId}&response_type=code&access_type=offline&redirect_uri={$this->redirectUrl}";
   }
 
   public function __get($name) {
@@ -133,11 +138,42 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    *  Grant token.
    */
   public function generateAccessToken($grant_token) {
-    $config = $this->getAuthorizationParams();
-
-    ZCRMRestClient::initialize($config);
     $oauth_client = ZohoOAuth::getClientInstance();
     return $oauth_client->generateAccessToken($grant_token);
+  }
+
+  /**
+   * Check if is possible to connect on API creating a Lead.
+   *
+   * @return bool
+   *   Return if was possible to connect or not.
+   */
+  public function checkConnection() {
+    $clientIns = ZCRMRestClient::getInstance();
+    try {
+      $moduleIns = $clientIns->getModuleInstance("Leads");
+      $record = ZCRMRecord::getInstance("Leads", NULL);
+      $record->setFieldValue('First_Name', 'Zoho');
+      $record->setFieldValue('Last_Name', 'CRM Integration');
+      $record->setFieldValue('Company', 'AT');
+      $record->setFieldValue('Designation', 'Zoho CRM Integration connection test.');
+
+      $bulkAPIResponse = $moduleIns->createRecords([$record]);
+      $entityResponses = $bulkAPIResponse->getEntityResponses();
+      $entityResponse = $entityResponses[0];
+      $status = $entityResponse->getStatus();
+
+      // Delete the test Lead.
+      $createdRecordInstance = $entityResponse->getData();
+      $recordIds = [$createdRecordInstance->getEntityId()];
+      $moduleIns->deleteRecords($recordIds);
+
+      return ($status == 'success');
+    }
+    catch (ZCRMException $e) {
+      // TODO: Add a log.
+      return FALSE;
+    }
   }
 
 }
