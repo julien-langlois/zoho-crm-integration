@@ -1,0 +1,35 @@
+<?php
+
+use \Drupal\Core\File\FileSystemInterface;
+
+/**
+ * Name of the file that will contain tokens for authorization.
+ */
+const TOKEN_FILE = 'private://zcrm_oauthtokens.txt';
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Remove the .txt token file.
+ */
+function zoho_crm_integration_uninstall() {
+  // Load token file.
+  $file = \Drupal::entityTypeManager()
+    ->getStorage('file')
+    ->loadByProperties(['uri' => TOKEN_FILE]);
+
+  // Delete token file.
+  file_delete(reset($file)->id());
+}
+
+/**
+ * Implements hook_install().
+ *
+ * Create .txt file on the private files directory that will contain tokens
+ * coming from the API.
+ */
+function zoho_crm_integration_install() {
+  // Save the file. Replace if it already exists.
+  file_save_data('', TOKEN_FILE, FileSystemInterface::EXISTS_REPLACE);
+}
+
