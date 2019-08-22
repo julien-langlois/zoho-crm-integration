@@ -1,0 +1,33 @@
+.zoho-settings-instructions {
+  border-top: 1px solid #ccc;
+  margin-top: 30px;
+  padding-top: 25px;
+}
+
+@media only screen and (min-width: 768px) {
+  #zoho-crm-settings {
+    display: flex;
+  }
+
+  .zoho-settings-instructions {
+    padding: 20px 30px 0 40px;
+    border: none;
+    margin: 0;
+    max-width: 500px;
+  }
+}
+
+.connection-link a {
+  width: 100%;
+}
+
+@media only screen and (min-width: 600px) {
+  .connection-link {
+    position: absolute;
+    margin: -40px 0 0 190px;
+  }
+
+  .connection-link a {
+    width: auto;
+  }
+}

@@ -9,16 +9,16 @@
  */
 #}
 
-<section class="zoho-crm-settings">
+<section id="zoho-crm-settings">
   <div class="zoho-setting-form">
     {{ form }}
 
     {% if status == 1 %}
-      <div class="revoke-link">
+      <div class="connection-link revoke-link">
         <a class="button button--secondary" href="http://zohocrm.com">{{ "Revoke authorization"|t }}</a>
       </div>
     {% else %}
-      <div class="auth-link">
+      <div class="connection-link auth-link">
         <a class="button button--secondary" href="{{ auth_url }}">{{ "Get authorization"|t }}</a>
       </div>
     {% endif %}
