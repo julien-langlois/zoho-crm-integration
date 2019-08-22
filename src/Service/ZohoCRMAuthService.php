@@ -59,13 +59,6 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $clientSecret;
 
   /**
-   * Secret ID.
-   *
-   * @var string
-   */
-  protected $secretId;
-
-  /**
    * User e-mail.
    *
    * @var string
@@ -73,11 +66,25 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $userEmail;
 
   /**
-   * Account URL.
+   * Zoho domain.
    *
    * @var string
    */
-  protected $accountUrl;
+  protected $zohoDomain;
+
+  /**
+   * Revoke URL.
+   *
+   * @var string
+   */
+  protected $revokeUrl;
+
+  /**
+   * Grant URL.
+   *
+   * @var string
+   */
+  protected $grantUrl;
 
   /**
    * File System Service.
@@ -98,15 +105,14 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->clientId = $config_factory->get(self::SETTINGS)->get('client_id');
     $this->clientSecret = $config_factory->get(self::SETTINGS)->get('client_secret');
     $this->userEmail = $config_factory->get(self::SETTINGS)->get('current_user_email');
+    $this->zohoDomain = $config_factory->get(self::SETTINGS)->get('zoho_domain');
     $this->redirectUrl = $base_url . Url::fromRoute(self::ROUTE)->toString();
     $this->fileSystem = $file_system->realPath('private://');
 
-    // TODO: Check if will need to add account URL options on Settings form.
-    // TODO: See: https://www.zoho.com/crm/developer/docs/api/refresh.html
-    $this->accountUrl = 'https://accounts.zoho.com';
-
     // Initialize the Client Service.
-    ZCRMRestClient::initialize($this->getAuthorizationParams());
+    // ZCRMRestClient::initialize($this->getAuthorizationParams());
+    // $this->grantUrl = ZohoOAuth::getGrantURL();
+    // $this->revokeUrl = ZohoOAuth::getRevokeTokenURL();
   }
 
   /**
@@ -126,7 +132,18 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     ];
     $query_string = http_build_query($params);
 
-    return "{$this->accountUrl}/oauth/v2/auth?{$query_string}";
+    return "{$this->grantUrl}?{$query_string}";
+  }
+
+  /**
+   * Generate the Revoke URL.
+   *
+   * @return string
+   *   The revoke URL.
+   */
+  public function getRevokeUrl() {
+    $refresh_token = '';
+    return "{$this->revokeUrl}?token={$refresh_token}";
   }
 
   /**
@@ -155,13 +172,19 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    *   Authorization parameters.
    */
   public function getAuthorizationParams() {
-    return [
+    $params = [
       'client_id' => $this->clientId,
       'client_secret' => $this->clientSecret,
       'redirect_uri' => $this->redirectUrl,
       'currentUserEmail' => $this->userEmail,
       'token_persistence_path' => $this->fileSystem,
     ];
+
+    if (!empty($this->zohoDomain) && $this->zohoDomain != 'default') {
+      $params['accounts_url'] = $this->zohoDomain;
+    }
+
+    return $params;
   }
 
   /**

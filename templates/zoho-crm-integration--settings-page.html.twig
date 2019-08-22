@@ -6,6 +6,7 @@
  * Available variables:
  * - form: The module settings form.
  * - auth_url: URL to get authorization.
+ * - revoke_url: URL to revoke authorization.
  */
 #}
 
@@ -15,7 +16,7 @@
 
     {% if status == 1 %}
       <div class="connection-link revoke-link">
-        <a class="button button--secondary" href="http://zohocrm.com">{{ "Revoke authorization"|t }}</a>
+        <a class="button button--secondary" href="{{ revoke_url }}">{{ "Revoke authorization"|t }}</a>
       </div>
     {% else %}
       <div class="connection-link auth-link">

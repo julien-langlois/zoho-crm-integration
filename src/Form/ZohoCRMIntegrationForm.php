@@ -134,6 +134,19 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
       }
     }
 
+    $form['zoho_domain'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Choose your Zoho Domain'),
+      '#default_value' => $config->get('zoho_domain'),
+      '#options' => [
+        'default' => '.COM (Default)',
+        'https://accounts.zoho.eu' => '.EU',
+        'https://accounts.zoho.com.cn' => '.CN',
+        'https://accounts.zoho.in' => '.IN',
+      ],
+      '#required' => TRUE,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -145,7 +158,7 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
     $config_settings = $this->configFactory->getEditable(static::SETTINGS);
 
     // Form settings set in text elements.
-    $text_configs = ['client_id', 'client_secret', 'current_user_email'];
+    $text_configs = ['client_id', 'client_secret', 'current_user_email', 'zoho_domain'];
 
     // Scopes set in checkbox elements.
     $scope_configs = $this->scopes_service->getFlattenedScopes();

@@ -56,9 +56,10 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
     // Retrieve form.
     $form = $this->formBuilder()->getForm('Drupal\zoho_crm_integration\Form\ZohoCRMIntegrationForm');
 
-    // Retrieve authentication service.
+    // Auth Services parameters.
     $status = $this->authService->checkConnection();
     $auth_url = $this->authService->getAuthorizationUrl();
+    $revoke_url = $this->authService->getRevokeUrl();
 
     // Check for redirect param code.
     if (!$status && isset($_GET['code'])) {
@@ -69,16 +70,17 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
     }
 
     if ($status) {
-      $this->messenger->addMessage($this->t('Connected.'), 'status');
+      $this->messenger->addMessage($this->t('You are connected. Note that you will have access only on the scopes you selected on the form.'), 'status');
     }
     else {
-      $this->messenger->addMessage($this->t('Not Connected.'), 'warning');
+      $this->messenger->addMessage($this->t('You are not connected yet. Add your configurations below and Get Authorization to start.'), 'warning');
     }
 
     $build = [
       '#theme' => 'zoho_crm_integration__settings_page',
       '#form' => $form,
       '#auth_url' => $auth_url,
+      '#revoke_url' => $revoke_url,
       '#status' => $status,
       '#attached' => [
         'library' => [
