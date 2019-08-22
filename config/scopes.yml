@@ -2,6 +2,17 @@ users:
   - all
 org:
   - all
+coql:
+  - read
+notifications:
+  - read
+  - create
+  - update
+  - delete
+bulk:
+  - all
+  - read
+  - create
 settings:
   - all
   - territories
@@ -43,14 +54,3 @@ modules:
   - notes
   - activities
   - search
-bulk:
-  - all
-  - read
-  - create
-notifications:
-  - read
-  - create
-  - update
-  - delete
-coql:
-  - read

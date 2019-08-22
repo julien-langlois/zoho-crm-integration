@@ -2,12 +2,23 @@
 
 namespace Drupal\zoho_crm_integration\Service;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class ZohoCRMIntegrationScopesService.
  */
 class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterface {
+
+  /**
+   * ZohoCRMIntegrationScopesService constructor.
+   *
+   * @param \Drupal\zoho_crm_integration\Service\ConfigFactoryInterface $config_factory
+   */
+  public function __construct(ConfigFactoryInterface $config_factory) {
+    $this->configFactory = $config_factory;
+    $this->settings = $config_factory->get('zoho_crm_integration.settings');
+  }
 
   /**
    * Retrieve scopes from .yml.
@@ -50,6 +61,46 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
     else {
       return false;
     }
+  }
+
+  /**
+   * Return scope array in a more config-friendly manner, i.e. "users.all".
+   *
+   * @return array
+   *  Flattened scopes.
+   */
+  public static function getFlattenedScopes() {
+    $all_scopes = self::getAllScopes();
+    $flattened_scopes = [];
+
+    foreach ($all_scopes as $group => $scopes) {
+      foreach ($scopes as $scope) {
+        $flattened_scopes[] = "{$group}_{$scope}";
+      }
+    }
+
+    return $flattened_scopes;
+  }
+
+  /**
+   * Build URL with scope paramenters.
+   *
+   * @return string
+   *  String with scope parameters to put in request URL.
+   */
+  public function getScopesParameters() {
+    // "aaaserver.profile.read" should be added as default.
+    $parameters = ['aaaserver.profile.read'];
+    $scopes = self::getFlattenedScopes();
+
+    foreach ($scopes as $scope) {
+      if ($config = $this->settings->get($scope)) {
+        // Group/scopes should be separated using "." as opposed to "_".
+        $parameters[] = str_replace('_', '.', $scope);
+      }
+    }
+
+    return urldecode(implode(',', $parameters));
   }
 
 }

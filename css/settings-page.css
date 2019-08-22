@@ -4,7 +4,7 @@
   padding-top: 25px;
 }
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 960px) {
   #zoho-crm-settings {
     display: flex;
   }
@@ -30,4 +30,51 @@
   .connection-link a {
     width: auto;
   }
+}
+
+@media only screen and (min-width: 960px) {
+  #zoho-settings-container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 600px;
+  }
+
+  #zoho-settings-container > div:nth-child(1),
+  #zoho-settings-container > div:nth-child(2),
+  #zoho-settings-container > div:nth-child(4),
+  #zoho-settings-container > div:nth-child(5) {
+    flex-basis: calc(100% / 4);
+  }
+
+  #zoho-settings-container > div:nth-child(3) {
+    flex-basis: calc(100% / 2);
+  }
+
+  #zoho-settings-container > div:nth-child(6),
+  #zoho-settings-container > div:nth-child(7) {
+    flex-basis: 100%;
+  }
+}
+
+@media only screen and (min-width: 960px) {
+  #zoho-settings-container > div:nth-child(6),
+  #zoho-settings-container > div:nth-child(7) {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  #zoho-settings-container > div:nth-child(6) h3,
+  #zoho-settings-container > div:nth-child(7) h3 {
+    flex-basis: 100%;
+  }
+
+  #zoho-settings-container > div:nth-child(6) > div,
+  #zoho-settings-container > div:nth-child(7) > div {
+    flex-basis: calc(100% / 4);
+  }
+}
+
+#zoho-crm-integration-settings input[type="text"],
+#zoho-crm-integration-settings input[type="email"] {
+  width: 100%;
 }

@@ -9,6 +9,7 @@ use zcrmsdk\crm\crud\ZCRMRecord;
 use zcrmsdk\crm\setup\restclient\ZCRMRestClient;
 use zcrmsdk\oauth\ZohoOAuth;
 use zcrmsdk\crm\exception\ZCRMException;
+use Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService;
 
 /**
  * Class ZohoCRMAuthService.
@@ -88,19 +89,12 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   /**
    * Constructs a new ZohoCRMAuthService object.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system) {
+  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system, ZohoCRMIntegrationScopesService $scopes_service) {
     global $base_url;
 
-    $scopes = [
-      'ZohoCRM.users.ALL',
-      'ZohoCRM.modules.ALL',
-      'Aaaserver.profile.Read',
-      'ZohoCRM.settings.ALL',
-      'ZohoCRM.bulk.ALL',
-    ];
-
+    $this->scopesService = $scopes_service;
+    $this->scope = $scopes_service->getScopesParameters();
     $this->configFactory = $config_factory;
-    $this->scope = implode(",", $scopes);
     $this->clientId = $config_factory->get(self::SETTINGS)->get('client_id');
     $this->clientSecret = $config_factory->get(self::SETTINGS)->get('client_secret');
     $this->userEmail = $config_factory->get(self::SETTINGS)->get('current_user_email');
