@@ -62,6 +62,19 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['zoho_domain'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Choose your Zoho Domain'),
+      '#default_value' => $config->get('zoho_domain'),
+      '#options' => [
+        'default' => '.COM (Default)',
+        'https://accounts.zoho.eu' => '.EU',
+        'https://accounts.zoho.com.cn' => '.CN',
+        'https://accounts.zoho.in' => '.IN',
+      ],
+      '#required' => TRUE,
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -74,6 +87,7 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
       ->set('client_id', $form_state->getValue('client_id'))
       ->set('client_secret', $form_state->getValue('client_secret'))
       ->set('current_user_email', $form_state->getValue('current_user_email'))
+      ->set('zoho_domain', $form_state->getValue('zoho_domain'))
       ->save();
 
     parent::submitForm($form, $form_state);
