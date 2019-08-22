@@ -4,6 +4,8 @@ namespace Drupal\zoho_crm_integration\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService;
+use Drupal\Component\Utility\Unicode;
 
 /**
  * Class ZohoCRMIntegrationForm.
@@ -26,6 +28,19 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
     return [
       static::SETTINGS,
     ];
+  }
+
+  /**
+   * Capitalize value given as parameter.
+   *
+   * @param $value
+   *  String to capitalize.
+   *
+   * @return string
+   *  Capitalized string.
+   */
+  protected function capitalize($value) {
+    return Unicode::ucfirst($value);
   }
 
   /**
@@ -61,6 +76,21 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
       '#default_value' => $config->get('current_user_email'),
       '#required' => TRUE,
     ];
+
+    // Retrieve scopes service.
+    $all_scopes = ZohoCRMIntegrationScopesService::getAllScopes();
+
+    $form['container'] = [
+      '#type' => 'container',
+    ];
+
+    foreach ($all_scopes as $group => $scopes) {
+      $form['container'][$group] = [
+        '#type' => 'checkboxes',
+        '#options' => array_map('self::capitalize', $scopes),
+        '#title' => $this->capitalize($group),
+      ];
+    }
 
     return parent::buildForm($form, $form_state);
   }

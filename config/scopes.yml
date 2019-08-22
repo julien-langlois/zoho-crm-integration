@@ -1,0 +1,56 @@
+users:
+  - all
+org:
+  - all
+settings:
+  - all
+  - territories
+  - custom_views
+  - related_lists
+  - modules
+  - variables
+  - tags
+  - tab_groups
+  - fields
+  - layouts
+  - macros
+  - custom_links
+  - custom_buttons
+  - roles
+  - profiles
+modules:
+  - all
+  - approvals
+  - leads
+  - accounts
+  - contacts
+  - deals
+  - campaigns
+  - tasks
+  - cases
+  - events
+  - calls
+  - solutions
+  - products
+  - vendors
+  - pricebooks
+  - quotes
+  - salesorders
+  - purchaseorders
+  - invoices
+  - custom
+  - dashboards
+  - notes
+  - activities
+  - search
+bulk:
+  - all
+  - read
+  - create
+notifications:
+  - read
+  - create
+  - update
+  - delete
+coql:
+  - read

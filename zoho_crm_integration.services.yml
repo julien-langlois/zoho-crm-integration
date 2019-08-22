@@ -1,7 +1,10 @@
 services:
-  logger.channel.zoho_crm_integration:
-    parent: logger.channel_base
-    arguments: ['zoho_crm_integration']
+  zoho_crm_integration.scopes:
+    class: Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService
+    arguments: []
   zoho_crm_integration.auth:
     class: Drupal\zoho_crm_integration\Service\ZohoCRMAuthService
     arguments: ['@config.factory', '@file_system']
+  logger.channel.zoho_crm_integration:
+    parent: logger.channel_base
+    arguments: ['zoho_crm_integration']
