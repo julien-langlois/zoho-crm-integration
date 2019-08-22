@@ -23,22 +23,30 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $configFactory;
 
   /**
-   * @var \Drupal\Core\Config\ImmutableConfig Config.
+   * Drupal Config service.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
    */
   protected $config;
 
   /**
-   * @var Redirect URL.
+   * Authorization Redirect URL.
+   *
+   * @var string
    */
   protected $redirectUrl;
 
   /**
-   * @var Scope.
+   * The list of authorized scopes.
+   *
+   * @var array
    */
   protected $scope;
 
   /**
-   * @var Client ID.
+   * Client ID.
+   *
+   * @var string
    */
   protected $clientId;
 
@@ -50,17 +58,30 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $clientSecret;
 
   /**
-   * @var Secret ID.
+   * Secret ID.
+   *
+   * @var string
    */
   protected $secretId;
 
   /**
-   * @var User e-mail.
+   * User e-mail.
+   *
+   * @var string
    */
   protected $userEmail;
 
   /**
-   * @var \Drupal\zoho_crm_integration\FileSystem File system.
+   * Account URL.
+   *
+   * @var string
+   */
+  protected $accountUrl;
+
+  /**
+   * File System Service.
+   *
+   * @var Drupal\Core\File\FileSystem
    */
   protected $fileSystem;
 
@@ -86,6 +107,10 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->redirectUrl = $base_url . Url::fromRoute(self::ROUTE)->toString();
     $this->fileSystem = $file_system->realPath('private://');
 
+    // TODO: Check if will need to add account URL options on Settings form.
+    // TODO: See: https://www.zoho.com/crm/developer/docs/api/refresh.html
+    $this->accountUrl = 'https://accounts.zoho.com';
+
     // Initialize the Client Service.
     ZCRMRestClient::initialize($this->getAuthorizationParams());
   }
@@ -94,13 +119,27 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    * Build authorization URL.
    *
    * @return string
-   *  Full authorization URL.
+   *   Full authorization URL.
    */
   public function getAuthorizationUrl() {
-    // @TODO: refactor to use absolute URL/query parameters properly.
-    return "https://accounts.zoho.com/oauth/v2/auth?prompt=consent&scope={$this->scope}&client_id={$this->clientId}&response_type=code&access_type=offline&redirect_uri={$this->redirectUrl}";
+    $params = [
+      'prompt' => 'consent',
+      'scope' => $this->scope,
+      'client_id' => $this->clientId,
+      'response_type' => 'code',
+      'access_type' => 'offline',
+      'redirect_uri' => $this->redirectUrl,
+    ];
+    $query_string = http_build_query($params);
+
+    return "{$this->accountUrl}/oauth/v2/auth?{$query_string}";
   }
 
+  /**
+   * Get magic method.
+   *
+   * @inheritDoc
+   */
   public function __get($name) {
     return $this->$name;
   }
@@ -109,7 +148,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    * Check if Client ID exists.
    *
    * @return bool
-   *  True if Client ID exists, otherwise false.
+   *   True if Client ID exists, otherwise false.
    */
   public function hasClientId() {
     return $this->clientId !== NULL && $this->clientId !== '';
@@ -119,7 +158,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    * Get authorization parameters.
    *
    * @return array
-   *  Authorization parameters.
+   *   Authorization parameters.
    */
   public function getAuthorizationParams() {
     return [
@@ -134,8 +173,13 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   /**
    * Generate access token.
    *
-   * @param $grant_token
-   *  Grant token.
+   * @param string $grant_token
+   *   Grant token.
+   *
+   * @return object
+   *   The Tokens Object.
+   *
+   * @throws \zcrmsdk\oauth\exception\ZohoOAuthException
    */
   public function generateAccessToken($grant_token) {
     $oauth_client = ZohoOAuth::getClientInstance();
