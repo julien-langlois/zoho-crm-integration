@@ -54,9 +54,7 @@
   #zoho-settings-container > div:nth-child(7) {
     flex-basis: 100%;
   }
-}
 
-@media only screen and (min-width: 960px) {
   #zoho-settings-container > div:nth-child(6),
   #zoho-settings-container > div:nth-child(7) {
     display: flex;
