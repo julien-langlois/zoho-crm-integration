@@ -110,9 +110,9 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->fileSystem = $file_system->realPath('private://');
 
     // Initialize the Client Service.
-    // ZCRMRestClient::initialize($this->getAuthorizationParams());
-    // $this->grantUrl = ZohoOAuth::getGrantURL();
-    // $this->revokeUrl = ZohoOAuth::getRevokeTokenURL();
+    ZCRMRestClient::initialize($this->getAuthorizationParams());
+    $this->grantUrl = ZohoOAuth::getGrantURL();
+    $this->revokeUrl = ZohoOAuth::getRevokeTokenURL();
   }
 
   /**
