@@ -1,0 +1,5 @@
+zoho-settings:
+  version: 1.x
+  css:
+    layout:
+      css/settings-page.css: {}

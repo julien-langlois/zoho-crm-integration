@@ -80,6 +80,11 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
       '#form' => $form,
       '#auth_url' => $auth_url,
       '#status' => $status,
+      '#attached' => [
+        'library' => [
+          'zoho_crm_integration/zoho-settings' => 'zoho_crm_integration/zoho-settings',
+        ],
+      ],
     ];
 
     return $build;
