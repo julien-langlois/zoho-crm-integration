@@ -18,7 +18,7 @@
       <div class="connection-link revoke-link">
         <a class="button button--secondary" href="{{ revoke_url }}">{{ "Revoke authorization"|t }}</a>
       </div>
-    {% else %}
+    {% elseif has_client_id %}
       <div class="connection-link auth-link">
         <a class="button button--secondary" href="{{ auth_url }}">{{ "Get authorization"|t }}</a>
       </div>
