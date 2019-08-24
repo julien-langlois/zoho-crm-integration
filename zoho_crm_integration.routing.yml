@@ -7,3 +7,12 @@ zoho_crm_integration.settings:
     _permission: 'administer zoho settings'
   options:
     _admin_route: TRUE
+zoho_crm_integration.revoke:
+  path: '/admin/config/services/zoho-revoke'
+  defaults:
+    _controller: '\Drupal\zoho_crm_integration\Controller\ZohoCRMIntegrationRevoke::revoke'
+    _title: 'Zoho CRM Integration Revoke route'
+  requirements:
+    _permission: 'administer zoho settings'
+  options:
+    _admin_route: TRUE
