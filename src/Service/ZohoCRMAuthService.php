@@ -3,10 +3,15 @@
 namespace Drupal\zoho_crm_integration\Service;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Url;
 use Drupal\Core\File\FileSystem;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use zcrmsdk\crm\crud\ZCRMRecord;
 use zcrmsdk\crm\setup\restclient\ZCRMRestClient;
+use zcrmsdk\oauth\exception\ZohoOAuthException;
 use zcrmsdk\oauth\ZohoOAuth;
 use zcrmsdk\crm\exception\ZCRMException;
 
@@ -93,10 +98,50 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $fileSystem;
 
   /**
-   * Constructs a new ZohoCRMAuthService object.
+   * The generated refresh token.
+   *
+   * @var string
    */
-  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system) {
+  protected $refreshToken;
+
+  /**
+   * Guzzle HTTP client.
+   *
+   * @var \GuzzleHttp\Client
+   */
+  protected $httpClient;
+
+  /**
+   * Drupal URL service.
+   *
+   * @var \Drupal\Core\Routing\UrlGeneratorInterface
+   */
+  protected $urlGenerator;
+
+  /**
+   * Constructs a new ZohoCRMAuthService object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Drupal Config Factory service.
+   * @param \Drupal\Core\File\FileSystem $file_system
+   *   Drupal File System service.
+   * @param \GuzzleHttp\Client $http_client
+   *   Drupal HTTP Client service.
+   * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
+   *   Drupal URL service.
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system, Client $http_client, UrlGeneratorInterface $url_generator) {
     global $base_url;
+
+    $this->configFactory = $config_factory;
+    $this->httpClient = $http_client;
+    $this->refreshToken = NULL;
+    $this->urlGenerator = $url_generator;
+
+    // Getting the saved refresh token.
+    if ($refresh_token = $this->configFactory->get(self::SETTINGS)->get('refresh_token')) {
+      $this->refreshToken = $refresh_token;
+    }
 
     $scopes = [
       'ZohoCRM.users.ALL',
@@ -106,7 +151,6 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
       'ZohoCRM.bulk.ALL',
     ];
 
-    $this->configFactory = $config_factory;
     $this->scope = implode(",", $scopes);
     $this->clientId = $config_factory->get(self::SETTINGS)->get('client_id');
     $this->clientSecret = $config_factory->get(self::SETTINGS)->get('client_secret');
@@ -116,9 +160,24 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->fileSystem = $file_system->realPath('private://');
 
     // Initialize the Client Service.
-    ZCRMRestClient::initialize($this->getAuthorizationParams());
-    $this->grantUrl = ZohoOAuth::getGrantURL();
-    $this->revokeUrl = ZohoOAuth::getRevokeTokenURL();
+    if ($this->hasClientId() && !empty($this->refreshToken)) {
+      ZCRMRestClient::initialize($this->getAuthorizationParams());
+      $this->grantUrl = ZohoOAuth::getGrantURL();
+      $this->revokeUrl = ZohoOAuth::getRevokeTokenURL();
+    }
+    else {
+      $this->grantUrl = $this->zohoDomain . ZohoOAuth::getGrantURL();
+      $this->revokeUrl = $this->zohoDomain . ZohoOAuth::getRevokeTokenURL();
+    }
+  }
+
+  /**
+   * Get magic method.
+   *
+   * @inheritDoc
+   */
+  public function __get($name) {
+    return $this->$name;
   }
 
   /**
@@ -144,21 +203,27 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   /**
    * Generate the Revoke URL.
    *
-   * @return string
-   *   The revoke URL.
-   */
-  public function getRevokeUrl() {
-    $refresh_token = '';
-    return "{$this->revokeUrl}?token={$refresh_token}";
-  }
-
-  /**
-   * Get magic method.
+   * @return bool
+   *   Return TRUE if HTTP request works or FALSE.
    *
-   * @inheritDoc
+   * @throws \zcrmsdk\oauth\exception\ZohoOAuthException
+   * @throws \GuzzleHttp\Exception\GuzzleException
    */
-  public function __get($name) {
-    return $this->$name;
+  public function revokeRefreshToken() {
+    try {
+      $persistenceTokens = ZohoOAuth::getPersistenceHandlerInstance()->getOAuthTokens($this->userEmail);
+      $refresh_token = $persistenceTokens->getRefreshToken();
+      $request = $this->httpClient->request('POST', "{$this->revokeUrl}?token={$refresh_token}");
+
+      if ($request->getStatusCode() == '200') {
+        return TRUE;
+      }
+    }
+    catch (GuzzleException $e) {
+      return FALSE;
+    }
+
+    return FALSE;
   }
 
   /**
@@ -184,11 +249,8 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
       'redirect_uri' => $this->redirectUrl,
       'currentUserEmail' => $this->userEmail,
       'token_persistence_path' => $this->fileSystem,
+      'accounts_url' => $this->zohoDomain,
     ];
-
-    if (!empty($this->zohoDomain) && $this->zohoDomain != 'default') {
-      $params['accounts_url'] = $this->zohoDomain;
-    }
 
     return $params;
   }
@@ -199,14 +261,25 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    * @param string $grant_token
    *   Grant token.
    *
-   * @return object
-   *   The Tokens Object.
-   *
    * @throws \zcrmsdk\oauth\exception\ZohoOAuthException
    */
   public function generateAccessToken($grant_token) {
-    $oauth_client = ZohoOAuth::getClientInstance();
-    return $oauth_client->generateAccessToken($grant_token);
+    try {
+      ZCRMRestClient::initialize($this->getAuthorizationParams());
+      $oauth_client = ZohoOAuth::getClientInstance();
+      $tokens = $oauth_client->generateAccessToken($grant_token);
+
+      if (is_object($tokens)) {
+        $this->refreshToken = $tokens->getRefreshToken();
+        $this->configFactory->getEditable(self::SETTINGS)->set('refresh_token', $this->refreshToken)->save();
+
+        $response = new RedirectResponse($this->urlGenerator->generateFromRoute('zoho_crm_integration.settings'));
+        $response->send();
+      }
+    }
+    catch (ZohoOAuthException $e) {
+      // TODO: Write a log.
+    }
   }
 
   /**
@@ -238,7 +311,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
       return ($status == 'success');
     }
     catch (ZCRMException $e) {
-      // TODO: Add a log.
+      // TODO: Add a drupal log.
       return FALSE;
     }
   }
