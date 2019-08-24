@@ -58,13 +58,14 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
 
     // Auth Services parameters.
     $status = $this->authService->checkConnection();
+    $has_client_id = $this->authService->hasClientId();
     $auth_url = $this->authService->getAuthorizationUrl();
-    $revoke_url = $this->authService->getRevokeUrl();
+    $revoke_url = $this->getUrlGenerator()->generateFromRoute('zoho_crm_integration.revoke');
 
     // Check for redirect param code.
     if (!$status && isset($_GET['code'])) {
-      $tokens = $this->authService->generateAccessToken($_GET['code']);
-      if (is_object($tokens)) {
+      $access = $this->authService->generateAccessToken($_GET['code']);
+      if ($access) {
         $this->messenger->addMessage($this->t('You get Authorization on your Zoho CRM.'), 'status');
       }
     }
@@ -73,7 +74,7 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
       $this->messenger->addMessage($this->t('You are connected. Note that you will have access only on the scopes you selected on the form.'), 'status');
     }
     else {
-      $this->messenger->addMessage($this->t('You are not connected yet. Add your configurations below and Get Authorization to start.'), 'warning');
+      $this->messenger->addMessage($this->t('You are not connected yet. Add your Zoho Client configurations below to be able to get you Authorization.'), 'warning');
     }
 
     $build = [
@@ -82,6 +83,7 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
       '#auth_url' => $auth_url,
       '#revoke_url' => $revoke_url,
       '#status' => $status,
+      '#has_client_id' => $has_client_id,
       '#attached' => [
         'library' => [
           'zoho_crm_integration/zoho-settings' => 'zoho_crm_integration/zoho-settings',

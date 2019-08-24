@@ -67,7 +67,7 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
       '#title' => $this->t('Choose your Zoho Domain'),
       '#default_value' => $config->get('zoho_domain'),
       '#options' => [
-        'default' => '.COM (Default)',
+        'https://accounts.zoho.com' => '.COM (Default)',
         'https://accounts.zoho.eu' => '.EU',
         'https://accounts.zoho.com.cn' => '.CN',
         'https://accounts.zoho.in' => '.IN',
