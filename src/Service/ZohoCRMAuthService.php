@@ -14,6 +14,7 @@ use zcrmsdk\crm\setup\restclient\ZCRMRestClient;
 use zcrmsdk\oauth\exception\ZohoOAuthException;
 use zcrmsdk\oauth\ZohoOAuth;
 use zcrmsdk\crm\exception\ZCRMException;
+use Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService;
 
 /**
  * Class ZohoCRMAuthService.
@@ -119,20 +120,31 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $urlGenerator;
 
   /**
+   * Drupal Scopes Services.
+   *
+   * @var \Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService
+   */
+  protected $scopesService;
+
+  /**
    * Constructs a new ZohoCRMAuthService object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   Drupal Config Factory service.
    * @param \Drupal\Core\File\FileSystem $file_system
    *   Drupal File System service.
+   * @param \Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService $scopes_service
+   *   Drupal Scopes services.
    * @param \GuzzleHttp\Client $http_client
    *   Drupal HTTP Client service.
    * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
    *   Drupal URL service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system, Client $http_client, UrlGeneratorInterface $url_generator) {
+  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system, ZohoCRMIntegrationScopesService $scopes_service, Client $http_client, UrlGeneratorInterface $url_generator) {
     global $base_url;
 
+    $this->scopesService = $scopes_service;
+    $this->scope = $scopes_service->getScopesParameters();
     $this->configFactory = $config_factory;
     $this->httpClient = $http_client;
     $this->refreshToken = NULL;
