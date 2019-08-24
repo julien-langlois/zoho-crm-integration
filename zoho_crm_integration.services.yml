@@ -4,4 +4,4 @@ services:
     arguments: ['zoho_crm_integration']
   zoho_crm_integration.auth:
     class: Drupal\zoho_crm_integration\Service\ZohoCRMAuthService
-    arguments: ['@config.factory', '@file_system']
+    arguments: ['@config.factory', '@file_system', '@http_client', '@url_generator']
