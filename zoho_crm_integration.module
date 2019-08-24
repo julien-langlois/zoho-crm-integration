@@ -14,6 +14,7 @@ function zoho_crm_integration_theme($existing, $type, $theme, $path) {
       'variables' => [
         'form' => NULL,
         'status' => NULL,
+        'has_client_id' => FALSE,
         'auth_url' => NULL,
         'revoke_url' => NULL,
       ],
