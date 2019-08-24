@@ -143,8 +143,8 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system, ZohoCRMIntegrationScopesService $scopes_service, Client $http_client, UrlGeneratorInterface $url_generator) {
     global $base_url;
 
+    // Getting services.
     $this->scopesService = $scopes_service;
-    $this->scope = $scopes_service->getScopesParameters();
     $this->configFactory = $config_factory;
     $this->httpClient = $http_client;
     $this->refreshToken = NULL;
@@ -155,15 +155,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
       $this->refreshToken = $refresh_token;
     }
 
-    $scopes = [
-      'ZohoCRM.users.ALL',
-      'ZohoCRM.modules.ALL',
-      'Aaaserver.profile.Read',
-      'ZohoCRM.settings.ALL',
-      'ZohoCRM.bulk.ALL',
-    ];
-
-    $this->scope = implode(",", $scopes);
+    $this->scope = $scopes_service->getScopesParameters();
     $this->clientId = $config_factory->get(self::SETTINGS)->get('client_id');
     $this->clientSecret = $config_factory->get(self::SETTINGS)->get('client_secret');
     $this->userEmail = $config_factory->get(self::SETTINGS)->get('current_user_email');

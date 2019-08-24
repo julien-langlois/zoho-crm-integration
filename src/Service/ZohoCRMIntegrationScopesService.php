@@ -11,9 +11,24 @@ use Symfony\Component\Yaml\Yaml;
 class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterface {
 
   /**
+   * Drupal config factory services.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  private $configFactory;
+
+  /**
+   * Setting form configurations.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  private $settings;
+
+  /**
    * ZohoCRMIntegrationScopesService constructor.
    *
-   * @param \Drupal\zoho_crm_integration\Service\ConfigFactoryInterface $config_factory
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Drupal Config Factory services.
    */
   public function __construct(ConfigFactoryInterface $config_factory) {
     $this->configFactory = $config_factory;
@@ -24,7 +39,7 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
    * Retrieve scopes from .yml.
    *
    * @return array
-   *  Scopes.
+   *   Scopes.
    */
   protected static function getScopes() {
     $full_path = drupal_get_path('module', 'zoho_crm_integration') . '/' . self::SCOPES_FILE_PATH;
@@ -36,7 +51,7 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
    * Get all available scopes.
    *
    * @return array
-   *  Array version of scopes .yml file.
+   *   Array version of scopes .yml file.
    */
   public static function getAllScopes() {
     return self::getScopes();
@@ -45,12 +60,12 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
   /**
    * Get scopes from a particular group.
    *
-   * @param $group
-   *  Desired group to retrieve scopes from.
+   * @param string $group
+   *   Desired group to retrieve scopes from.
    *
    * @return bool|mixed
-   *  Return scopes for a given group in array format or false if group doesn't
-   *  exist.
+   *   Return scopes for a given group in array format or false if group doesn't
+   *   exist.
    */
   public static function getGroupScopes($group) {
     $scopes = self::getScopes();
@@ -58,16 +73,15 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
     if (isset($scopes[$group])) {
       return $scopes[$group];
     }
-    else {
-      return false;
-    }
+
+    return FALSE;
   }
 
   /**
    * Return scope array in a more config-friendly manner, i.e. "users.all".
    *
    * @return array
-   *  Flattened scopes.
+   *   Flattened scopes.
    */
   public static function getFlattenedScopes() {
     $all_scopes = self::getAllScopes();
@@ -86,7 +100,7 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
    * Build URL with scope paramenters.
    *
    * @return string
-   *  String with scope parameters to put in request URL.
+   *   String with scope parameters to put in request URL.
    */
   public function getScopesParameters() {
     // "aaaserver.profile.read" should be added as default.
@@ -94,9 +108,17 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
     $scopes = self::getFlattenedScopes();
 
     foreach ($scopes as $scope) {
-      if ($config = $this->settings->get($scope)) {
+      if ($this->settings->get($scope)) {
         // Group/scopes should be separated using "." as opposed to "_".
-        $parameters[] = str_replace('_', '.', $scope);
+        $scope_name = str_replace('_', '.', $scope);
+
+        // All modules and settings scopes end with .ALL to allow READ and WRITE.
+        $is_module = (strpos($scope_name, 'modules.') === 0 && $scope_name !== 'modules.all');
+        $is_settings = (strpos($scope_name, 'settings.') === 0 && $scope_name !== 'settings.all');
+        $suffix = ($is_module || $is_settings) ? '.ALL' : '';
+
+        // All scopes need to start with ZohoCRM.
+        $parameters[] = "ZohoCRM.{$scope_name}{$suffix}";
       }
     }
 
