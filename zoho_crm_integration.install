@@ -13,13 +13,14 @@ const TOKEN_FILE = 'private://zcrm_oauthtokens.txt';
  * Remove the .txt token file.
  */
 function zoho_crm_integration_uninstall() {
-  // Load token file.
-  $file = \Drupal::entityTypeManager()
-    ->getStorage('file')
-    ->loadByProperties(['uri' => TOKEN_FILE]);
+  $file_storage = \Drupal::service('entity_type.manager')->getStorage('file');
 
-  // Delete token file.
-  file_delete(reset($file)->id());
+  // Load token file and delete.
+  $file = $file_storage->loadByProperties(['uri' => TOKEN_FILE]);
+
+  if (is_array($file)) {
+    $file_storage->delete($file);
+  }
 }
 
 /**
