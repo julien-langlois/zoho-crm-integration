@@ -8,13 +8,11 @@ use Drupal\Core\Url;
 use Drupal\Core\File\FileSystem;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use zcrmsdk\crm\crud\ZCRMRecord;
 use zcrmsdk\crm\setup\restclient\ZCRMRestClient;
 use zcrmsdk\oauth\exception\ZohoOAuthException;
 use zcrmsdk\oauth\ZohoOAuth;
-use zcrmsdk\crm\exception\ZCRMException;
-use Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService;
 
 /**
  * Class ZohoCRMAuthService.
@@ -127,6 +125,13 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
   protected $scopesService;
 
   /**
+   * The custom Logger service.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
    * Constructs a new ZohoCRMAuthService object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -139,8 +144,10 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    *   Drupal HTTP Client service.
    * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
    *   Drupal URL service.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   Custom ZohoCRM module Logger.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system, ZohoCRMIntegrationScopesService $scopes_service, Client $http_client, UrlGeneratorInterface $url_generator) {
+  public function __construct(ConfigFactoryInterface $config_factory, FileSystem $file_system, ZohoCRMIntegrationScopesService $scopes_service, Client $http_client, UrlGeneratorInterface $url_generator, LoggerInterface $logger) {
     global $base_url;
 
     // Getting services.
@@ -149,6 +156,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->httpClient = $http_client;
     $this->refreshToken = NULL;
     $this->urlGenerator = $url_generator;
+    $this->logger = $logger;
 
     // Getting the saved refresh token.
     if ($refresh_token = $this->configFactory->get(self::SETTINGS)->get('refresh_token')) {
@@ -224,6 +232,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
       }
     }
     catch (GuzzleException $e) {
+      $this->logger->alert("Error trying revoke Zoho CRM API Refresh Token. Exception message: {$e->getMessage()}");
       return FALSE;
     }
 
@@ -282,7 +291,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
       }
     }
     catch (ZohoOAuthException $e) {
-      // TODO: Write a log.
+      $this->logger->alert("Error trying generate Zoho CRM API Access Token from Grant Token. Exception message: {$e->getMessage()}");
     }
   }
 
@@ -290,32 +299,21 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    * Check if is possible to connect on API creating a Lead.
    *
    * @return bool
-   *   Return if was possible to connect or not.
+   *   Return TRUE if you could success connect on user/info endpoint.
+   *
+   * @throws \zcrmsdk\oauth\exception\ZohoOAuthException
    */
   public function checkConnection() {
-    $clientIns = ZCRMRestClient::getInstance();
+    $oauth_client = ZohoOAuth::getClientInstance();
+
     try {
-      $moduleIns = $clientIns->getModuleInstance("Leads");
-      $record = ZCRMRecord::getInstance("Leads", NULL);
-      $record->setFieldValue('First_Name', 'Zoho');
-      $record->setFieldValue('Last_Name', 'CRM Integration');
-      $record->setFieldValue('Company', 'AT');
-      $record->setFieldValue('Designation', 'Zoho CRM Integration connection test.');
+      $accessToken = $oauth_client->getAccessToken($this->userEmail);
+      $user = $oauth_client->getUserEmailIdFromIAM($accessToken);
 
-      $bulkAPIResponse = $moduleIns->createRecords([$record]);
-      $entityResponses = $bulkAPIResponse->getEntityResponses();
-      $entityResponse = $entityResponses[0];
-      $status = $entityResponse->getStatus();
-
-      // Delete the test Lead.
-      $createdRecordInstance = $entityResponse->getData();
-      $recordIds = [$createdRecordInstance->getEntityId()];
-      $moduleIns->deleteRecords($recordIds);
-
-      return ($status == 'success');
+      return ($user !== NULL);
     }
-    catch (ZCRMException $e) {
-      // TODO: Add a drupal log.
+    catch (ZohoOAuthException $e) {
+      $this->logger->alert("Error trying test Zoho CRM API connection. Exception message: {$e->getMessage()}");
       return FALSE;
     }
   }
