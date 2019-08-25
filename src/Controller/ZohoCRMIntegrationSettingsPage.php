@@ -61,6 +61,7 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
     $has_client_id = $this->authService->hasClientId();
     $auth_url = $this->authService->getAuthorizationUrl();
     $revoke_url = $this->getUrlGenerator()->generateFromRoute('zoho_crm_integration.revoke');
+    $redirect_link = $this->authService->redirectUrl;
 
     // Check for redirect param code.
     if (!$status && isset($_GET['code'])) {
@@ -84,6 +85,7 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
       '#revoke_url' => $revoke_url,
       '#status' => $status,
       '#has_client_id' => $has_client_id,
+      '#redirect_link' => $redirect_link,
       '#attached' => [
         'library' => [
           'zoho_crm_integration/zoho-settings' => 'zoho_crm_integration/zoho-settings',
