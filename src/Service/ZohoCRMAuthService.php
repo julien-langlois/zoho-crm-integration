@@ -170,8 +170,12 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->zohoDomain = $config_factory->get(self::SETTINGS)->get('zoho_domain');
     $this->redirectUrl = $base_url . Url::fromRoute(self::ROUTE)->toString();
     $this->fileSystem = $file_system->realPath('private://');
-    $this->grantUrl = $this->zohoDomain . ZohoOAuth::getGrantURL();
-    $this->revokeUrl = $this->zohoDomain . ZohoOAuth::getRevokeTokenURL();
+
+    // Use ZohoOAuth class only if the class exist.
+    if (class_exists('ZohoOAuth')) {
+      $this->grantUrl = $this->zohoDomain . ZohoOAuth::getGrantURL();
+      $this->revokeUrl = $this->zohoDomain . ZohoOAuth::getRevokeTokenURL();
+    }
   }
 
   /**

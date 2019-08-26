@@ -53,6 +53,14 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
    * Returns a render-able array for a test page.
    */
   public function content() {
+    if (!class_exists('ZohoOAuth')) {
+      $this->messenger->addMessage($this->t('You have not installed the Zoho SDK.'), 'error');
+
+      return [
+        '#markup' => $this->t('To use this page, you need to get the Zoho SDK using composer.'),
+      ];
+    }
+
     // Retrieve form.
     $form = $this->formBuilder()->getForm('Drupal\zoho_crm_integration\Form\ZohoCRMIntegrationForm');
 
