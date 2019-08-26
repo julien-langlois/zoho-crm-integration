@@ -170,17 +170,8 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->zohoDomain = $config_factory->get(self::SETTINGS)->get('zoho_domain');
     $this->redirectUrl = $base_url . Url::fromRoute(self::ROUTE)->toString();
     $this->fileSystem = $file_system->realPath('private://');
-
-    // Initialize the Client Service.
-    if ($this->hasClientId() && !empty($this->refreshToken)) {
-      ZCRMRestClient::initialize($this->getAuthorizationParams());
-      $this->grantUrl = ZohoOAuth::getGrantURL();
-      $this->revokeUrl = ZohoOAuth::getRevokeTokenURL();
-    }
-    else {
-      $this->grantUrl = $this->zohoDomain . ZohoOAuth::getGrantURL();
-      $this->revokeUrl = $this->zohoDomain . ZohoOAuth::getRevokeTokenURL();
-    }
+    $this->grantUrl = $this->zohoDomain . ZohoOAuth::getGrantURL();
+    $this->revokeUrl = $this->zohoDomain . ZohoOAuth::getRevokeTokenURL();
   }
 
   /**
@@ -223,6 +214,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    */
   public function revokeRefreshToken() {
     try {
+      $this->initialize();
       $persistenceTokens = ZohoOAuth::getPersistenceHandlerInstance()->getOAuthTokens($this->userEmail);
       $refresh_token = $persistenceTokens->getRefreshToken();
       $request = $this->httpClient->request('POST', "{$this->revokeUrl}?token={$refresh_token}");
@@ -255,7 +247,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    * @return array
    *   Authorization parameters.
    */
-  public function getAuthorizationParams() {
+  private function getAuthorizationParams() {
     $params = [
       'client_id' => $this->clientId,
       'client_secret' => $this->clientSecret,
@@ -278,7 +270,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    */
   public function generateAccessToken($grant_token) {
     try {
-      ZCRMRestClient::initialize($this->getAuthorizationParams());
+      $this->initialize();
       $oauth_client = ZohoOAuth::getClientInstance();
       $tokens = $oauth_client->generateAccessToken($grant_token);
 
@@ -304,9 +296,9 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    * @throws \zcrmsdk\oauth\exception\ZohoOAuthException
    */
   public function checkConnection() {
-    $oauth_client = ZohoOAuth::getClientInstance();
-
     try {
+      $this->initialize();
+      $oauth_client = ZohoOAuth::getClientInstance();
       $accessToken = $oauth_client->getAccessToken($this->userEmail);
       $user = $oauth_client->getUserEmailIdFromIAM($accessToken);
 
@@ -316,6 +308,13 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
       $this->logger->alert("Error trying test Zoho CRM API connection. Exception message: {$e->getMessage()}");
       return FALSE;
     }
+  }
+
+  /**
+   * Initialize ZCRMRestClient.
+   */
+  public function initialize() {
+    ZCRMRestClient::initialize($this->getAuthorizationParams());
   }
 
 }

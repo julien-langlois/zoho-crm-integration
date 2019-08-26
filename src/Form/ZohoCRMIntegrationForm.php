@@ -27,7 +27,9 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
    * ZohoCRMIntegrationForm constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   Drupal Config Factory service.
    * @param \Drupal\zoho_crm_integration\Service\ZohoCRMIntegrationScopesService $scopes_service
+   *   Zoho CRM Scope service.
    */
   public function __construct(ConfigFactoryInterface $config_factory, ZohoCRMIntegrationScopesService $scopes_service) {
     parent::__construct($config_factory);
@@ -59,11 +61,11 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
   /**
    * Capitalize value given as parameter.
    *
-   * @param $value
-   *  String to capitalize.
+   * @param string $value
+   *   String to capitalize.
    *
    * @return string
-   *  Capitalized string.
+   *   Capitalized string.
    */
   protected function capitalize($value) {
     return Unicode::ucfirst($value);
@@ -158,7 +160,12 @@ class ZohoCRMIntegrationForm extends ConfigFormBase {
     $config_settings = $this->configFactory->getEditable(static::SETTINGS);
 
     // Form settings set in text elements.
-    $text_configs = ['client_id', 'client_secret', 'current_user_email', 'zoho_domain'];
+    $text_configs = [
+      'client_id',
+      'client_secret',
+      'current_user_email',
+      'zoho_domain',
+    ];
 
     // Scopes set in checkbox elements.
     $scope_configs = $this->scopes_service->getFlattenedScopes();
