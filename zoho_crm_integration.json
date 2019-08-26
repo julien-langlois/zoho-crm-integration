@@ -1,0 +1,30 @@
+{
+  "name": "drupal/zoho_crm_integration",
+  "description": "Zoho CRM Integration is a Third-party Integration with the Zoho PHP SDK.",
+  "type": "drupal-module",
+  "homepage": "https://drupal.org/project/zoho_crm_integration",
+  "authors": [
+    {
+      "name": "Adriano Pulz (adrianopulz)",
+      "email": "adrianopulz@gmail.com",
+      "homepage": "https://www.drupal.org/u/adrianopulz",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Leonardo Post (leonardopost)",
+      "email": "postleonardof@gmail.com",
+      "homepage": "https://www.drupal.org/u/leonardopost",
+      "role": "Co-maintainer"
+    }
+  ],
+  "support": {
+    "issues": "https://drupal.org/project/issues/zoho_crm_integration",
+    "irc": "irc://irc.freenode.org/drupal-contribute",
+    "source": "https://cgit.drupalcode.org/zoho_crm_integration"
+  },
+  "license": "GPL-2.0-or-later",
+  "minimum-stability": "dev",
+  "require": {
+    "zohocrm/php-sdk": "2.0.1"
+  }
+}
