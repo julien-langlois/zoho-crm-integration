@@ -172,7 +172,7 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
     $this->fileSystem = $file_system->realPath('private://');
 
     // Use ZohoOAuth class only if the class exist.
-    if (class_exists('ZohoOAuth')) {
+    if ($this->checkSdkClass()) {
       $this->grantUrl = $this->zohoDomain . ZohoOAuth::getGrantURL();
       $this->revokeUrl = $this->zohoDomain . ZohoOAuth::getRevokeTokenURL();
     }
@@ -319,6 +319,17 @@ class ZohoCRMAuthService implements ZohoCRMAuthInterface {
    */
   public function initialize() {
     ZCRMRestClient::initialize($this->getAuthorizationParams());
+  }
+
+  /**
+   * Check for ZohoOAuth.php file on vendor folder.
+   *
+   * @return bool
+   *   Return TRUE if ZohoOAuth.php file exist.
+   */
+  public function checkSdkClass() {
+    $file = DRUPAL_ROOT . '/../vendor/zohocrm/php-sdk/src/oauth/ZohoOAuth.php';
+    return (file_exists($file));
   }
 
 }

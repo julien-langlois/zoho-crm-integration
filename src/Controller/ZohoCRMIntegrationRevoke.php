@@ -33,6 +33,8 @@ class ZohoCRMIntegrationRevoke extends ControllerBase {
    *
    * @param \Drupal\zoho_crm_integration\Service\ZohoCRMAuthService $auth_service
    *   The module handler service.
+   * @param \Drupal\Core\Messenger\Messenger $messenger
+   *   Drupal Messenger service.
    */
   public function __construct(ZohoCRMAuthService $auth_service, Messenger $messenger) {
     $this->authService = $auth_service;
