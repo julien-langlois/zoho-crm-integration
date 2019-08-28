@@ -112,7 +112,7 @@ class ZohoCRMIntegrationScopesService implements ZohoCRMIntegrationScopesInterfa
         // Group/scopes should be separated using "." as opposed to "_".
         $scope_name = str_replace('_', '.', $scope);
 
-        // All modules and settings scopes end with .ALL to allow READ and WRITE.
+        // All modules and settings scopes needs end with .ALL.
         $is_module = (strpos($scope_name, 'modules.') === 0 && $scope_name !== 'modules.all');
         $is_settings = (strpos($scope_name, 'settings.') === 0 && $scope_name !== 'settings.all');
         $suffix = ($is_module || $is_settings) ? '.ALL' : '';
