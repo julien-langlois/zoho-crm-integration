@@ -16,4 +16,5 @@ interface ZohoCRMAuthInterface {
    * Zoho CRM settings route.
    */
   const ROUTE = 'zoho_crm_integration.settings';
+
 }
