@@ -1,6 +1,11 @@
 <?php
 
-use \Drupal\Core\File\FileSystemInterface;
+/**
+ * @file
+ * Installation actions for Zoho CRM Integration.
+ */
+
+use Drupal\Core\File\FileSystemInterface;
 
 /**
  * Name of the file that will contain tokens for authorization.
@@ -33,4 +38,3 @@ function zoho_crm_integration_install() {
   // Save the file. Replace if it already exists.
   file_save_data('', TOKEN_FILE, FileSystemInterface::EXISTS_REPLACE);
 }
-
