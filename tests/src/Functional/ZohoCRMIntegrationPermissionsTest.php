@@ -12,16 +12,22 @@ class ZohoCRMIntegrationPermissionsTest extends BrowserTestBase {
 
   /**
    * The mocked user with "Administer Zoho Settings" permission.
+   *
+   * @var \Drupal\user\Entity\User
    */
   protected $accountWithPermissions;
 
   /**
    * The mocked user without "Administer Zoho Settings" permission.
+   *
+   * @var \Drupal\user\Entity\User
    */
   protected $accountWithNoPermissions;
 
   /**
    * Zoho settings form path.
+   *
+   * @var \Drupal\Core\Url
    */
   protected $settingsPath;
 
@@ -47,8 +53,12 @@ class ZohoCRMIntegrationPermissionsTest extends BrowserTestBase {
   }
 
   /**
-   * Login as user with "Administer Zoho Settings" permission and make sure
-   * access is granted.
+   * Test account with permission.
+   *
+   * Login as user with "Administer Zoho Settings" permission
+   * and make sure access is granted.
+   *
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
   public function testAccountWithPermissions() {
     $this->drupalLogin($this->accountWithPermissions);
@@ -59,6 +69,8 @@ class ZohoCRMIntegrationPermissionsTest extends BrowserTestBase {
   }
 
   /**
+   * Test account with no permission.
+   *
    * Login as authenticated user without "Administer Zoho Settings" permission
    * and make sure access is not granted.
    */
