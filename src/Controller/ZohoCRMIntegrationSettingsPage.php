@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\zoho_crm_integration\Service\ZohoCRMAuthService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Messenger\Messenger;
+use Drupal\Core\Routing\UrlGeneratorInterface;
 
 /**
  * Module settings page controller.
@@ -27,16 +28,26 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
   protected $messenger;
 
   /**
+   * The Drupal URL Generator service.
+   *
+   * @var \Drupal\Core\Routing\UrlGeneratorInterface
+   */
+  protected $urlGenerator;
+
+  /**
    * Controller Constructor.
    *
    * @param \Drupal\zoho_crm_integration\Service\ZohoCRMAuthService $auth_service
    *   The module handler service.
    * @param \Drupal\Core\Messenger\Messenger $messenger
    *   The messenger service.
+   * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
+   *   The UrlGeneratorInterface service.
    */
-  public function __construct(ZohoCRMAuthService $auth_service, Messenger $messenger) {
+  public function __construct(ZohoCRMAuthService $auth_service, Messenger $messenger, UrlGeneratorInterface $url_generator) {
     $this->authService = $auth_service;
     $this->messenger = $messenger;
+    $this->urlGenerator = $url_generator;
   }
 
   /**
@@ -45,7 +56,8 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('zoho_crm_integration.auth'),
-      $container->get('messenger')
+      $container->get('messenger'),
+      $container->get('url_generator')
     );
   }
 
@@ -68,7 +80,7 @@ class ZohoCRMIntegrationSettingsPage extends ControllerBase {
     $status = $this->authService->checkConnection();
     $has_client_id = $this->authService->hasClientId();
     $auth_url = $this->authService->getAuthorizationUrl();
-    $revoke_url = $this->getUrlGenerator()->generateFromRoute('zoho_crm_integration.revoke');
+    $revoke_url = $this->urlGenerator->generateFromRoute('zoho_crm_integration.revoke');
     $redirect_link = $this->authService->redirectUrl;
 
     // Check for redirect param code.
