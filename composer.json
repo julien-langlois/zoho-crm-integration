@@ -25,6 +25,6 @@
   "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
   "require": {
-    "zohocrm/php-sdk": "2.0.1"
+    "zohocrm/php-sdk-archive": "2.0.1"
   }
 }
